@@ -1,0 +1,3 @@
+{
+  "enabled_classes": ["Control", "Button", "Label", "LineEdit", "VBoxContainer", "CenterContainer", "ColorRect", "MarginContainer", "PanelContainer", "ScrollContainer", "StyleBoxFlat", "Theme", "TextServer", "SceneTree", "Viewport", "InputEventKey", "Engine", "OS"]
+}
