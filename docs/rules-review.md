@@ -10,6 +10,22 @@ The model now has a typed trait catalog and a signature-trick draft validator co
 
 The GM can also define custom selectable traits through the catalog API. This is an explicitly requested campaign extension; the PDF definitions remain immutable defaults. Custom traits follow the same slot/access validation and can declare prerequisites. Their descriptions do not automatically execute new effects.
 
+## Confirmed App Extension: Interlude
+
+The user has requested a dedicated Interlude interface for between-show campaign activity: NPC recruitment, trick creation, PC level changes, permanent upgrades, explained next-show Anticipation or circus Prestige adjustments, and contributions from personal funds into the circus budget. Preparation retains all of these Interlude capabilities, including permanent-upgrade purchases, and adds promotion and temporary-upgrade purchases. Promotion and temporary purchases are excluded from Interlude. This is the confirmed app-stage organization; normal rule eligibility and timing still apply.
+
+The ability to record an external campaign event and its numerical consequence with a reason is confirmed app scope; it does not assert a new automatic reward formula in the PDF. Prestige must retain these entries as distinct sources in its explanation. Existing game-rule checks still apply to recruitment, progression/redesign, and purchases.
+
+The user confirmed that Interlude Anticipation follows the PDF's normal expiry/capacity rules (printed p. 60): ignore excess over the applicable maximum, and reset Anticipation after a show or six days after its first generation if no show occurs. Interlude entries use the shared next-show Anticipation window, not indefinite reservation or an independent timer. Preserve the distinction between next-show effects and circus-wide Prestige, and do not reinterpret a one-show adjustment as a recurring bonus. Current-state changes remain reversible, and completed shows remain read-only through the interface. See [Design Notes — Interlude Stage](design-notes.md#interlude-stage).
+
+## Approved Show Time Mapping
+
+The app follows the Circus Show Sheet on printed p. 68 (PDF p. 10) and the ordered procedure on printed p. 61 (PDF p. 3). Temporary purchases finish in Preparation; Show Time begins with backstage assignments, then random events and their required choices, and establishes the starting values before the acts. Required availability/recovery checks must be resolved before an affected performer participates; their finer timing remains subject to rule clarification.
+
+The approved interface shows the current act prominently with a compact four-act overview, 1/2/1/3 slots, performer controls, external roll entry, immediate results, and compact active-act correction rows. Costar, clowns, and backstage choices use their rule eligibility and timing. Management controls are hidden while the show runs. Results remain correctable until the explicit Finish Show action creates the read-only historical record and settles awards once.
+
+These are approved UI/workflow decisions, not rulings that resolve the Time action budget, NPC clown eligibility, or the remaining roll-entry and reaction/resource questions. See [Design Notes — Show Time Stage](design-notes.md#show-time-stage--approved).
+
 ## Missing Records for Later Work
 
 These concepts are required for broader rules support but do not yet have dedicated C++ structures:
@@ -22,9 +38,10 @@ These concepts are required for broader rules support but do not yet have dedica
 | Upgrade definition | Catalog price, minimum Prestige, prerequisites, and typed effects; distinct from `OwnedUpgrade` | 69 |
 | Runtime modifier/event effects | Trait metadata exists; executable effects still need source, target, bonus or penalty type, duration, exceptions, and choices. Some change DCs, capacity, payouts, or actions rather than rolls | 63-66, 69 |
 | Performer availability | Injury and recovery across shows, and show-specific exclusions | 64-66 |
-| Preparation | Advertising tier, promotion attempts and Aid, downtime dates, and starting show values | 60-61 |
+| Preparation | Advertising tier, promotion attempts and Aid, downtime dates, and starting show values; retains all Interlude management operations using shared records | 60-61; shared-stage availability is confirmed app workflow |
 | Resource and money records | Purchase funding, spell slots/alchemical items, transactions, and historical payout inputs | 64-65, 67, 69 |
-| Temporary upgrades | Per-show purchases and merchandise carryover to the following show | 69; deliberately outside current implementation scope |
+| Temporary upgrades | Per-show purchases in show preparation, excluded from Interlude; merchandise carryover to the following show | 69; implementation pending |
+| Shared Interlude/Preparation adjustments and contributions | Stable sources, numeric changes, reasons, next-show/circus scope, personal-fund deposits, and reversible application without duplicate effects | Confirmed app workflow; normal Anticipation expiry/capacity confirmed; show binding still to decide |
 
 ## Source Wording to Handle Explicitly
 

@@ -9,12 +9,24 @@ The C++17 model is defined in `src/domain/circus.h`, with trait definitions and 
 | `name` | Display name of the circus. |
 | `actors` | Actor records keyed by stable IDs, independent of names. |
 | `permanent_upgrades` | Purchased upgrades keyed by type, preventing duplicate ownership. |
-| `show_history` | Completed shows keyed by stable IDs. Required as a source of prestige. |
+| `show_history` | Completed shows keyed by stable IDs. Core feature and source of prestige; finished records are read-only through the interface. |
 | `balance` | Current funds as an integer number of copper units. Transaction history is deferred. |
 | `trait_catalog` | Built-in trait definitions plus GM-created definitions for this circus. |
 | `unlocked_traits` | Starting and retained trait access; current NPC tricks also grant access through `available_trick_traits()`. |
 
-There is no stored prestige total. `calculate_prestige()` produces its breakdown from current source records.
+There is no stored prestige total. `calculate_prestige()` produces its breakdown from current source records. The confirmed Interlude workflow requires additional source records described below; these are future requirements, not fields already present in this table.
+
+## Interlude Records to Add
+
+Interlude is a dedicated between-show interface that uses the actor, trick, permanent-upgrade, and money models. It also needs records for explained GM-entered changes to next-show Anticipation and circus Prestige. Preparation uses the same management and adjustment records: it retains every Interlude operation and adds promotion and temporary-upgrade purchases. These records and their API are not implemented by the current type reference.
+
+Each adjustment needs a stable identity, the affected quantity, the numeric change, the GM's reason, and its scope (circus Prestige or next-show Anticipation). Preserve enough information to apply it once, reverse it consistently, save/load it, and explain the resulting value. The exact calendar/date fields and assignment of a next-show adjustment to a concrete show remain to be defined. Reasons are explanatory data, not executable rules.
+
+Prestige adjustments must extend the typed source representation and derived breakdown; directly overwriting a Prestige total or fabricating a completed show would lose the actual source. The popup must include each adjustment's amount and reason. Anticipation adjustments must remain attributable during preparation and follow normal expiry/capacity rules: excess generation is ignored, and the shared next-show Anticipation pool resets after a show or six days after first generation without a show. Retain campaign timing and enough source information to explain the effective contribution; do not bank capped excess or assign each entry a fresh expiry window. Binding entries to a concrete show and cancellation/postponement handling within those rules remain to be designed.
+
+Personal contributions into the circus budget need distinct money records with the contributed amount and source. They are not show income and must not change past Payout. Full tracking of personal wallets is not yet specified. Neither explained adjustments nor contribution records require a general action-history UI.
+
+Commits in Interlude and Preparation apply immediately and remain reversible while preserving finished-show history. Both stages permit recruitment, trick creation, PC level changes, permanent purchases, explained adjustments, and personal contributions. Promotion and temporary purchases are available in Preparation only. Existing rule validation still applies. Shared operations must use the same source records so entering Preparation cannot duplicate an adjustment, deposit, recruitment, or purchase, or restart Anticipation expiry. Derived preparation values must reflect current management data.
 
 ## Actors
 
@@ -51,6 +63,8 @@ The detailed rules on printed pages 67 and 69 give:
 
 For example, starting prestige, Spotlights, and one successful show total **4**. The popup will show all three contributions. Each contribution carries its points, label, campaign date where available, and a typed source reference. Both the displayed prestige value and the popup must use the same calculated breakdown.
 
+In addition to those built-in rules, the confirmed app workflow must include explained GM-entered Prestige adjustments from Interlude or Preparation as distinct sources. This is a required extension to the current calculation/source types, not an implemented rule listed above.
+
 Watermarked Tickets affect prestige only for payout calculation and do not add permanent prestige. Payout-related modifiers belong in that separate calculation.
 
 Completed show outcomes supply historical awards; opening the popup never awards points again. Future payout calculation must use prestige before adding the current show's award. The minimal show record currently stores its name, date, outcome, and payout; detailed check history and historical character snapshots are deferred.
@@ -63,7 +77,25 @@ Spotlights grant a permanent increase. Keep their ownership record as the source
 
 `ShowOutcome` describes the whole show: Excitement below Anticipation is `Failure`, above is `Success`, and equality is `CriticalSuccess`. Individual checks additionally have critical failure, so they will need a separate result type. `CompletedShow.outcome` is currently supplied by the caller; the model does not yet calculate or validate it.
 
-Payout is profit after baseline expenses and employee pay; those costs must not be deducted again. Circus profits are for circus expenses. PCs can contribute personal funds toward purchases, so a later ledger should distinguish those contributions from show income.
+Payout is profit after baseline expenses and employee pay; those costs must not be deducted again. Circus profits are for circus expenses. PCs can contribute personal funds toward purchases. The confirmed Interlude and Preparation interfaces also let the GM record contributions directly into the circus budget, so the future ledger must distinguish these deposits from show income and avoid counting them twice when money is later spent.
+
+## Show Time Records to Add
+
+The approved Show Time interface needs a live-show record distinct from the completed historical record. It must retain circus/settlement/date, preparation inputs and purchased upgrades, backstage assignments, externally entered events and choices, starting values, current values, performer availability, and progress through setup, four acts, and Results.
+
+Each act needs its 1/2/1/3 performer/trick assignments, the checks and DCs used, applicable traits/modifiers, actions/reactions and repeat penalties, resource and injury effects, pending choices, and compact action/result rows that support correction. Record sufficient source values for later management edits to leave completed history unchanged. This is a future information contract, not a claim that these types already exist.
+
+The active Results state remains correctable. Finish Show settles payout and Prestige exactly once and creates the read-only completed record. Preserve pre-award Prestige and the other payout inputs; reopening a view must not repeat settlement. Management mutations such as recruitment, level/trick editing, and purchases are unavailable through Show Time, while active-show corrections remain supported.
+
+The exact fields, undo dependencies, save mechanics, and unresolved Time/NPC-clown/roll-resolution rules still need design. See [Design Notes — Show Time Stage](design-notes.md#show-time-stage--approved).
+
+## Required Mutation and History Behavior
+
+The following are confirmed requirements for future mutation and persistence workflows, not claims about the current structs' enforcement. A committed change takes effect immediately and must be reversible. Finished shows are the exception: the interface cannot edit, delete, or reopen them for modification. Historical actor/check/modifier values must remain independent of later changes to current records.
+
+Undo and correction must keep affected current values consistent without rewriting finished-show records. The finalization boundary is the explicit Finish Show action on Results. Handling changes with dependencies across that boundary still needs design. Immediate game-state application does not by itself specify when data is written to disk.
+
+A visible action-history feature is unnecessary. Retain the data required for calculations, reversible changes, active-show resume, and finished-show details; a transaction ledger or internal undo data does not imply an action-log screen. Detailed historical fields and undo retention remain to be specified.
 
 ## Supporting Type Reference
 
